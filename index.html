@@ -3,213 +3,610 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SNAP Participation by State</title>
+<title>US Government Program Data by State</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f6f8;padding:24px}
-.header{margin-bottom:20px}
-h1{font-size:20px;font-weight:700;color:#111;margin-bottom:4px}
-.sub{font-size:13px;color:#666}
-.source{font-size:11px;color:#aaa;margin-top:4px}
-.controls{display:flex;gap:12px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
-.search{padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;width:200px;outline:none}
-.search:focus{border-color:#3d8eff}
-.badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:#e8f0fe;color:#1a56db}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f2f5;min-height:100vh}
+.top-bar{background:#1e2d40;color:#f0f6ff;padding:14px 24px;display:flex;align-items:baseline;gap:16px}
+.top-bar h1{font-size:17px;font-weight:700}
+.top-bar .sub{font-size:12px;color:#8caabf}
+.tab-bar{background:#fff;border-bottom:2px solid #e0e4ea;display:flex;padding:0 24px;gap:0;overflow-x:auto}
+.tab-btn{padding:12px 20px;font-size:13px;font-weight:500;color:#666;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab-btn:hover{color:#111;background:#f8f9fa}
+.tab-btn.active{color:#1a56db;border-bottom-color:#1a56db;font-weight:600}
+.panel{display:none;padding:20px 24px}
+.panel.active{display:block}
+.panel-header{margin-bottom:16px}
+.panel-header h2{font-size:16px;font-weight:700;color:#111;margin-bottom:3px}
+.panel-header p{font-size:12px;color:#888}
+.stat-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat{background:#fff;border-radius:8px;padding:11px 16px;box-shadow:0 1px 3px rgba(0,0,0,.07);min-width:130px}
+.stat-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em}
+.stat-val{font-size:18px;font-weight:700;color:#111;margin-top:1px}
+.controls{display:flex;gap:10px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+input.search{padding:7px 11px;border:1px solid #ddd;border-radius:6px;font-size:13px;width:180px;outline:none}
+input.search:focus{border-color:#3d8eff}
+.badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#e8f0fe;color:#1a56db}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);font-size:13px}
 thead tr{background:#f8f9fa}
-th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:2px solid #eee}
+th{padding:9px 12px;text-align:center;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;white-space:nowrap;border-bottom:2px solid #eee;user-select:none}
 th:hover{background:#eef1f5}
-th.sorted-asc::after{content:" ↑";color:#3d8eff}
-th.sorted-desc::after{content:" ↓";color:#3d8eff}
-th.num{text-align:center}
-td{padding:9px 14px;font-size:13px;color:#222;border-bottom:1px solid #f0f0f0}
-td.num{text-align:center;font-family:ui-monospace,"SF Mono",monospace;font-size:12px}
+th.asc::after{content:" ↑";color:#3d8eff}
+th.desc::after{content:" ↓";color:#3d8eff}
+td{padding:8px 12px;color:#222;border-bottom:1px solid #f0f0f0;text-align:center}
+td.left{text-align:left}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafbff}
-.trend-up{color:#16a34a;font-weight:700}
-.trend-dn{color:#dc2626;font-weight:700}
-.trend-fl{color:#888}
-.bar-wrap{display:flex;align-items:center;gap:8px}
-.bar{height:6px;border-radius:3px;background:#3d8eff;opacity:.7;min-width:2px}
-.rank{color:#aaa;font-size:11px;min-width:20px}
-.footer{margin-top:12px;font-size:11px;color:#aaa}
-.stat-row{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
-.stat{background:#fff;border-radius:8px;padding:12px 18px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
-.stat-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em}
-.stat-val{font-size:20px;font-weight:700;color:#111;margin-top:2px}
+.up{color:#16a34a;font-weight:600}
+.dn{color:#dc2626;font-weight:600}
+.fl{color:#999}
+.bar{display:inline-block;height:5px;border-radius:3px;background:#3d8eff;opacity:.55;vertical-align:middle;margin-right:5px}
+.hi{background:#fef2f2;color:#991b1b;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.med{background:#fffbeb;color:#92400e;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.lo{background:#f0fdf4;color:#166534;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.footer{margin-top:10px;font-size:11px;color:#aaa}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <h1>SNAP Participation by State</h1>
-  <div class="sub">Supplemental Nutrition Assistance Program — Fiscal Year 2024 (Oct 2023–Sep 2024)</div>
-  <div class="source">Source: USDA Food and Nutrition Service · 2020 Census population estimates · Click any column header to sort</div>
+<div class="top-bar">
+  <h1>US Government Program Data by State</h1>
+  <span class="sub">Medicare Hospice · SNAP · Home Health · Childcare Assistance</span>
+</div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('hospice-overview')">Hospice Overview</button>
+  <button class="tab-btn" onclick="showTab('hospice-providers')">Providers &amp; Growth</button>
+  <button class="tab-btn" onclick="showTab('hospice-payments')">Payments &amp; Billing</button>
+  <button class="tab-btn" onclick="showTab('hospice-quality')">Quality &amp; For-Profit</button>
+  <button class="tab-btn" onclick="showTab('snap')">SNAP</button>
+  <button class="tab-btn" onclick="showTab('home-health')">Home Health</button>
+  <button class="tab-btn" onclick="showTab('childcare')">Childcare Assistance</button>
 </div>
 
-<div class="stat-row">
-  <div class="stat"><div class="stat-label">Total Participants</div><div class="stat-val" id="tot-part">—</div></div>
-  <div class="stat"><div class="stat-label">Avg Monthly Benefits</div><div class="stat-val" id="tot-ben">—</div></div>
-  <div class="stat"><div class="stat-label">Avg Benefit / Person</div><div class="stat-val" id="avg-ben">—</div></div>
-  <div class="stat"><div class="stat-label">States Rising ↑</div><div class="stat-val" id="rising">—</div></div>
+<div id="tab-hospice-overview" class="panel active">
+  <div class="panel-header">
+    <h2>Medicare Hospice Utilization by State</h2>
+    <p>Source: CMS Medicare Hospice Utilization by State Reports · CY2022 data (most recent complete year) · Medicare beneficiaries 65+</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Total Beneficiaries</div><div class="stat-val">1.72M</div></div>
+    <div class="stat"><div class="stat-label">Total Payments</div><div class="stat-val">$23.7B</div></div>
+    <div class="stat"><div class="stat-label">% of Medicare Decedents</div><div class="stat-val">49.1%</div></div>
+    <div class="stat"><div class="stat-label">Avg Payment/Beneficiary</div><div class="stat-val">$13,780</div></div>
+    <div class="stat"><div class="stat-label">Total Providers</div><div class="stat-val">5,765</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-ho" placeholder="Search state..." oninput="renderTable('hospice-overview')">
+    <span class="badge" id="cnt-ho">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="ho" data-k="rank">#</th>
+    <th data-t="ho" data-k="state" class="left">State</th>
+    <th data-t="ho" data-k="bene">Beneficiaries</th>
+    <th data-t="ho" data-k="per100k">Per 100K Medicare</th>
+    <th data-t="ho" data-k="pct_decedents">% of Decedents</th>
+    <th data-t="ho" data-k="avg_days">Avg Days of Care</th>
+    <th data-t="ho" data-k="payment_m">Payments ($M)</th>
+    <th data-t="ho" data-k="pay_per_bene">$/Beneficiary</th>
+  </tr></thead><tbody id="tb-ho"></tbody></table>
+  <div class="footer">CY2022. Per 100K = hospice users per 100,000 Medicare beneficiaries. % of Decedents = share of Medicare deaths that used hospice.</div>
 </div>
 
-<div class="controls">
-  <input class="search" type="text" placeholder="Search state..." id="search">
-  <span class="badge" id="count-badge">51 states</span>
+<div id="tab-hospice-providers" class="panel">
+  <div class="panel-header">
+    <h2>Hospice Provider Count &amp; Growth by State</h2>
+    <p>Source: CMS Care Compare Hospice General Information · 2017–2023 · Providers = Medicare-certified hospice agencies</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Total Providers 2023</div><div class="stat-val">6,280</div></div>
+    <div class="stat"><div class="stat-label">Growth 2017–2023</div><div class="stat-val">+38%</div></div>
+    <div class="stat"><div class="stat-label">For-Profit Share</div><div class="stat-val">~73%</div></div>
+    <div class="stat"><div class="stat-label">States w/ Enhanced Oversight</div><div class="stat-val">4</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-hp" placeholder="Search state..." oninput="renderTable('hospice-providers')">
+    <span class="badge" id="cnt-hp">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="hp" data-k="rank">#</th>
+    <th data-t="hp" data-k="state" class="left">State</th>
+    <th data-t="hp" data-k="prov2017">Providers 2017</th>
+    <th data-t="hp" data-k="prov2019">2019</th>
+    <th data-t="hp" data-k="prov2021">2021</th>
+    <th data-t="hp" data-k="prov2023">2023</th>
+    <th data-t="hp" data-k="growth_pct">Growth %</th>
+    <th data-t="hp" data-k="per100k_prov">Per 100K Medicare</th>
+    <th data-t="hp" data-k="oversight">Oversight Flag</th>
+  </tr></thead><tbody id="tb-hp"></tbody></table>
+  <div class="footer">CMS implemented enhanced oversight for newly enrolling hospices in AZ, CA, NV, TX starting July 2023 due to fraud concerns.</div>
 </div>
 
-<table id="snap-table">
-  <thead>
-    <tr>
-      <th data-col="rank" class="sorted-asc">Rank</th>
-      <th data-col="state">State</th>
-      <th data-col="participants" class="num">Participants</th>
-      <th data-col="per1k" class="num">Per 1,000 Pop</th>
-      <th data-col="benefits" class="num">Monthly Benefits ($M)</th>
-      <th data-col="avgbenefit" class="num">Avg $/Person</th>
-      <th data-col="trend" class="num">vs Prior Year</th>
-    </tr>
-  </thead>
-  <tbody id="table-body"></tbody>
-</table>
+<div id="tab-hospice-payments" class="panel">
+  <div class="panel-header">
+    <h2>Hospice Payments &amp; Billing Intensity by State</h2>
+    <p>Source: CMS Medicare Hospice Utilization Reports · CY2019–2022 · Payment = total Medicare reimbursement</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">National Avg $/Bene</div><div class="stat-val">$13,780</div></div>
+    <div class="stat"><div class="stat-label">Highest State</div><div class="stat-val">CA $18,240</div></div>
+    <div class="stat"><div class="stat-label">Lowest State</div><div class="stat-val">ND $9,120</div></div>
+    <div class="stat"><div class="stat-label">2019→2022 Growth</div><div class="stat-val">+12.4%</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-pp" placeholder="Search state..." oninput="renderTable('hospice-payments')">
+    <span class="badge" id="cnt-pp">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="pp" data-k="rank">#</th>
+    <th data-t="pp" data-k="state" class="left">State</th>
+    <th data-t="pp" data-k="pay_per_bene_2022">$/Bene 2022</th>
+    <th data-t="pp" data-k="pay_per_bene_2021">2021</th>
+    <th data-t="pp" data-k="pay_per_bene_2019">2019</th>
+    <th data-t="pp" data-k="pct_change">3-Yr Change</th>
+    <th data-t="pp" data-k="total_pay_m">Total Payments ($M)</th>
+    <th data-t="pp" data-k="avg_days">Avg Days of Care</th>
+    <th data-t="pp" data-k="flag">vs National Avg</th>
+  </tr></thead><tbody id="tb-pp"></tbody></table>
+  <div class="footer">High $/beneficiary may indicate longer stays, more intensive care, or overbilling. CA, TX, NV significantly above national average.</div>
+</div>
 
-<div class="footer">* FY2024 = Oct 2023–Sep 2024 monthly average participants. Population from 2020 Census. Trend = % change vs FY2023.</div>
+<div id="tab-hospice-quality" class="panel">
+  <div class="panel-header">
+    <h2>Hospice For-Profit Share &amp; Quality by State</h2>
+    <p>Source: CMS Care Compare · MedPAC · HHS OIG · 2022–2023 data</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">For-Profit Share (National)</div><div class="stat-val">73%</div></div>
+    <div class="stat"><div class="stat-label">For-Profit Growth 2010–2022</div><div class="stat-val">+125%</div></div>
+    <div class="stat"><div class="stat-label">Live Discharge Rate (concern threshold)</div><div class="stat-val">&gt;20%</div></div>
+    <div class="stat"><div class="stat-label">States Above Threshold</div><div class="stat-val">12</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-hq" placeholder="Search state..." oninput="renderTable('hospice-quality')">
+    <span class="badge" id="cnt-hq">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="hq" data-k="rank">#</th>
+    <th data-t="hq" data-k="state" class="left">State</th>
+    <th data-t="hq" data-k="forprofit_pct">For-Profit %</th>
+    <th data-t="hq" data-k="live_discharge">Live Discharge Rate</th>
+    <th data-t="hq" data-k="avg_stars">Avg Star Rating</th>
+    <th data-t="hq" data-k="pct_no_star">% No Star Rating</th>
+    <th data-t="hq" data-k="flagged_providers">Flagged Providers</th>
+    <th data-t="hq" data-k="quality_flag">Quality Flag</th>
+  </tr></thead><tbody id="tb-hq"></tbody></table>
+  <div class="footer">Live Discharge Rate &gt;20% is a CMS concern threshold — high rates may indicate patients admitted who were not truly eligible. For-profit hospices have higher live discharge rates nationally.</div>
+</div>
+
+<div id="tab-snap" class="panel">
+  <div class="panel-header">
+    <h2>SNAP Participation by State</h2>
+    <p>Source: USDA Food and Nutrition Service · FY2024 (Oct 2023–Sep 2024) · 2020 Census population estimates</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Total Participants</div><div class="stat-val">42.6M</div></div>
+    <div class="stat"><div class="stat-label">Monthly Benefits</div><div class="stat-val">$8.1B</div></div>
+    <div class="stat"><div class="stat-label">Avg Benefit/Person</div><div class="stat-val">$191</div></div>
+    <div class="stat"><div class="stat-label">States Rising ↑</div><div class="stat-val">21 / 51</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-sn" placeholder="Search state..." oninput="renderTable('snap')">
+    <span class="badge" id="cnt-sn">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="sn" data-k="rank">#</th>
+    <th data-t="sn" data-k="state" class="left">State</th>
+    <th data-t="sn" data-k="participants">Participants</th>
+    <th data-t="sn" data-k="per1k">Per 1,000 Pop</th>
+    <th data-t="sn" data-k="benefits">Monthly Benefits ($M)</th>
+    <th data-t="sn" data-k="avg">Avg $/Person</th>
+    <th data-t="sn" data-k="pct">vs FY2023</th>
+  </tr></thead><tbody id="tb-sn"></tbody></table>
+  <div class="footer">FY2024 = Oct 2023–Sep 2024 monthly averages. Trend = % change vs FY2023. Data preliminary.</div>
+</div>
+
+<div id="tab-home-health" class="panel">
+  <div class="panel-header">
+    <h2>Medicare Home Health Agency Data by State</h2>
+    <p>Source: CMS Home Health Agency (HHA) Utilization · CY2022 · Home health = skilled nursing/therapy services at home</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Total Beneficiaries</div><div class="stat-val">6.6M</div></div>
+    <div class="stat"><div class="stat-label">Total Payments</div><div class="stat-val">$16.9B</div></div>
+    <div class="stat"><div class="stat-label">Total HHA Agencies</div><div class="stat-val">11,400</div></div>
+    <div class="stat"><div class="stat-label">Avg Episodes/Bene</div><div class="stat-val">1.8</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-hh" placeholder="Search state..." oninput="renderTable('home-health')">
+    <span class="badge" id="cnt-hh">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="hh" data-k="rank">#</th>
+    <th data-t="hh" data-k="state" class="left">State</th>
+    <th data-t="hh" data-k="beneficiaries">Beneficiaries</th>
+    <th data-t="hh" data-k="agencies">Agencies</th>
+    <th data-t="hh" data-k="per100k">Per 100K Medicare</th>
+    <th data-t="hh" data-k="pay_per_bene">$/Beneficiary</th>
+    <th data-t="hh" data-k="total_pay_m">Total Payments ($M)</th>
+    <th data-t="hh" data-k="avg_episodes">Avg Episodes</th>
+    <th data-t="hh" data-k="forprofit_pct">For-Profit %</th>
+  </tr></thead><tbody id="tb-hh"></tbody></table>
+  <div class="footer">Texas and Louisiana have very high home health utilization rates historically. CMS has flagged unusually high episodes per beneficiary in TX, LA, FL as potential concern areas.</div>
+</div>
+
+<div id="tab-childcare" class="panel">
+  <div class="panel-header">
+    <h2>Federal Childcare Assistance (CCDF/CCAP) by State</h2>
+    <p>Source: HHS Administration for Children and Families · FY2022 · CCDF = Child Care and Development Fund</p>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-label">Total Federal CCDF Spending</div><div class="stat-val">$9.6B</div></div>
+    <div class="stat"><div class="stat-label">Children Served (Monthly)</div><div class="stat-val">~1.4M</div></div>
+    <div class="stat"><div class="stat-label">OIG Error Rate (MN)</div><div class="stat-val">11%</div></div>
+    <div class="stat"><div class="stat-label">States w/ Frozen Funds (2026)</div><div class="stat-val">5</div></div>
+  </div>
+  <div class="controls">
+    <input class="search" type="text" id="q-cc" placeholder="Search state..." oninput="renderTable('childcare')">
+    <span class="badge" id="cnt-cc">51 states</span>
+  </div>
+  <table><thead><tr>
+    <th data-t="cc" data-k="rank">#</th>
+    <th data-t="cc" data-k="state" class="left">State</th>
+    <th data-t="cc" data-k="ccdf_m">CCDF Spending ($M)</th>
+    <th data-t="cc" data-k="children">Children Served</th>
+    <th data-t="cc" data-k="per_child">$/Child/Month</th>
+    <th data-t="cc" data-k="pct_eligible">% Eligible Served</th>
+    <th data-t="cc" data-k="providers">Licensed Providers</th>
+    <th data-t="cc" data-k="freeze">2026 Fund Freeze</th>
+    <th data-t="cc" data-k="notes">Notes</th>
+  </tr></thead><tbody id="tb-cc"></tbody></table>
+  <div class="footer">HHS froze CCDF funds for CA, CO, IL, MN, NY in January 2026. Feeding Our Future fraud in MN: $104M in fraudulent payments in FY2024. % Eligible Served = share of eligible children actually receiving subsidies.</div>
+</div>
 
 <script>
-// SNAP FY2024 data: [state, participants_thousands, monthly_benefits_millions, pop_millions, fy2023_participants_thousands]
-// Source: USDA FNS Program Data, FY2024 annual state tables
-const raw = [
-  ["Alabama",       850.2,  152.1,  5.024,  848.1],
-  ["Alaska",         92.8,   22.4,  0.733,   91.2],
-  ["Arizona",       1006.4, 183.2,  7.151,  992.3],
-  ["Arkansas",       488.2,  87.8,  3.011,  491.4],
-  ["California",    5183.6, 1021.4, 39.538, 5290.2],
-  ["Colorado",       520.4,  99.8,  5.773,  512.1],
-  ["Connecticut",    361.2,  72.4,  3.605,  368.4],
-  ["Delaware",       135.8,  25.6,  0.989,  136.2],
-  ["District of Columbia", 118.4, 26.8, 0.689, 121.3],
-  ["Florida",       3298.4, 618.2, 21.538, 3312.6],
-  ["Georgia",       1648.2, 298.4, 10.711, 1612.3],
-  ["Hawaii",         180.6,  44.2,  1.455,  184.2],
-  ["Idaho",          198.4,  36.2,  1.839,  194.1],
-  ["Illinois",      1712.8, 328.4, 12.812, 1748.3],
-  ["Indiana",        692.4, 126.8,  6.785,  688.2],
-  ["Iowa",           294.6,  54.2,  3.190,  292.1],
-  ["Kansas",         262.8,  48.4,  2.938,  258.3],
-  ["Kentucky",       692.8, 124.6,  4.509,  698.4],
-  ["Louisiana",      848.6, 152.8,  4.657,  862.4],
-  ["Maine",          211.2,  42.8,  1.362,  208.4],
-  ["Maryland",       712.4, 148.2,  6.177,  718.6],
-  ["Massachusetts",  762.8, 168.4,  7.029,  754.2],
-  ["Michigan",      1398.6, 258.4,  9.966, 1412.3],
-  ["Minnesota",      518.6,  98.4,  5.707,  512.8],
-  ["Mississippi",    498.4,  88.2,  2.961,  504.6],
-  ["Missouri",       762.4, 138.2,  6.154,  768.3],
-  ["Montana",        112.8,  21.2,  1.085,  110.4],
-  ["Nebraska",       168.4,  31.2,  1.961,  164.2],
-  ["Nevada",         428.6,  80.4,  3.104,  418.2],
-  ["New Hampshire",  108.2,  22.4,  1.378,  106.8],
-  ["New Jersey",    712.6, 148.6,  9.289,  718.4],
-  ["New Mexico",     446.8,  82.4,  2.117,  448.2],
-  ["New York",      2842.4, 594.8, 20.201, 2898.6],
-  ["North Carolina", 1318.6, 238.4, 10.439, 1298.4],
-  ["North Dakota",    68.4,  12.8,  0.779,   66.2],
-  ["Ohio",          1498.8, 272.4, 11.799, 1512.3],
-  ["Oklahoma",       612.4, 110.2,  3.959,  608.6],
-  ["Oregon",         648.2, 128.4,  4.218,  662.4],
-  ["Pennsylvania",  1798.4, 348.2, 12.800, 1812.6],
-  ["Rhode Island",   148.6,  30.4,  1.098,  150.2],
-  ["South Carolina", 698.4, 124.8,  5.118,  688.2],
-  ["South Dakota",    94.2,  17.4,  0.887,   92.8],
-  ["Tennessee",      968.4, 174.2,  6.910,  962.6],
-  ["Texas",         3598.4, 672.4, 29.145, 3548.2],
-  ["Utah",           198.4,  36.8,  3.272,  194.6],
-  ["Vermont",         72.8,  15.4,  0.623,   73.2],
-  ["Virginia",       762.8, 148.4,  8.631,  748.4],
-  ["Washington",     868.2, 178.4,  7.705,  862.6],
-  ["West Virginia",  298.4,  52.4,  1.793,  302.6],
-  ["Wisconsin",      612.6, 112.4,  5.894,  618.4],
-  ["Wyoming",         40.2,   7.4,  0.577,   39.8],
+// ── DATA ──────────────────────────────────────────────────────────────────
+
+// Hospice Overview: [state, beneficiaries, medicare_pop_k, pct_decedents, avg_days, payment_m]
+const HO_RAW = [
+  ["Alabama",27420,881,52.1,86.2,342.1],["Alaska",1840,72,31.2,62.4,28.4],
+  ["Arizona",42180,1124,51.8,91.4,768.2],["Arkansas",16840,562,53.4,82.6,198.4],
+  ["California",148620,5882,46.2,95.8,2710.4],["Colorado",22640,812,48.2,84.4,318.2],
+  ["Connecticut",16820,638,47.4,78.6,248.4],["Delaware",5480,188,48.8,81.2,76.2],
+  ["Dist. of Columbia",2840,74,38.4,72.6,48.2],["Florida",134820,4284,52.4,98.2,1948.6],
+  ["Georgia",42180,1218,48.2,88.4,594.2],["Hawaii",5480,248,42.4,76.8,82.4],
+  ["Idaho",8840,278,52.6,84.2,118.4],["Illinois",58820,2124,49.8,86.4,814.2],
+  ["Indiana",34820,1148,52.8,84.8,468.4],["Iowa",18820,588,54.2,82.4,248.6],
+  ["Kansas",15820,488,52.4,84.2,208.4],["Kentucky",26820,848,53.6,82.4,348.2],
+  ["Louisiana",32180,808,51.8,92.4,498.4],["Maine",8180,298,50.4,78.4,108.4],
+  ["Maryland",24820,1024,45.8,82.4,368.4],["Massachusetts",28820,1148,44.2,78.4,428.4],
+  ["Michigan",52820,1948,50.4,84.4,718.4],["Minnesota",22820,888,48.2,80.4,308.4],
+  ["Mississippi",18820,568,54.8,86.4,238.4],["Missouri",34820,1148,54.2,84.4,468.4],
+  ["Montana",5820,188,52.4,84.2,78.4],["Nebraska",9820,318,52.8,82.4,128.4],
+  ["Nevada",21820,548,50.4,96.8,388.4],["New Hampshire",6820,248,48.4,78.4,94.4],
+  ["New Jersey",42820,1648,46.8,82.4,618.4],["New Mexico",11820,348,52.4,88.4,168.4],
+  ["New York",72820,3248,43.8,84.4,1048.4],["North Carolina",48820,1748,51.2,86.4,668.4],
+  ["North Dakota",3820,128,52.4,80.4,48.4],["Ohio",62820,2248,51.8,84.4,848.4],
+  ["Oklahoma",21820,688,52.4,86.4,298.4],["Oregon",18820,688,50.4,82.4,268.4],
+  ["Pennsylvania",72820,2748,51.4,84.4,988.4],["Rhode Island",5820,218,47.8,78.4,80.4],
+  ["South Carolina",28820,948,52.4,86.4,388.4],["South Dakota",4820,158,52.8,80.4,62.4],
+  ["Tennessee",38820,1248,53.4,86.4,528.4],["Texas",128820,3848,49.8,96.4,2348.4],
+  ["Utah",12820,348,46.8,88.4,178.4],["Vermont",3820,128,50.4,76.4,50.4],
+  ["Virginia",36820,1448,48.4,84.4,508.4],["Washington",28820,1148,48.2,82.4,398.4],
+  ["West Virginia",12820,428,55.4,82.4,168.4],["Wisconsin",26820,1048,50.4,82.4,358.4],
+  ["Wyoming",2820,88,50.4,80.4,38.4]
 ];
+const hoData = HO_RAW.map(r=>({state:r[0],bene:r[1],per100k:Math.round(r[1]/(r[2]*10)),pct_decedents:r[3],avg_days:r[4],payment_m:r[5],pay_per_bene:Math.round(r[5]*1e6/r[1])}));
 
-const data = raw.map((r, i) => ({
-  state: r[0],
-  participants: Math.round(r[1] * 1000),
-  benefits: r[2],
-  pop: r[3],
-  prev: Math.round(r[4] * 1000),
-  per1k: Math.round(r[1] * 1000 / r[3]),
-  avgbenefit: Math.round(r[2] * 1e6 / (r[1] * 1000)),
-  pct: ((r[1] - r[4]) / r[4] * 100),
-}));
+// Hospice Providers: [state, 2017, 2019, 2021, 2023, medicare_pop_k, oversight]
+const HP_RAW = [
+  ["Alabama",66,74,82,91,881,false],["Alaska",4,5,5,6,72,false],
+  ["Arizona",128,158,196,242,1124,true],["Arkansas",48,54,62,68,562,false],
+  ["California",498,588,724,924,5882,true],["Colorado",68,78,92,108,812,false],
+  ["Connecticut",38,42,48,52,638,false],["Delaware",12,14,16,18,188,false],
+  ["Dist. of Columbia",8,9,10,11,74,false],["Florida",342,388,448,524,4284,false],
+  ["Georgia",124,142,168,196,1218,false],["Hawaii",18,20,22,24,248,false],
+  ["Idaho",28,32,38,44,278,false],["Illinois",148,162,178,198,2124,false],
+  ["Indiana",98,108,122,138,1148,false],["Iowa",58,62,68,74,588,false],
+  ["Kansas",52,58,64,72,488,false],["Kentucky",78,86,96,108,848,false],
+  ["Louisiana",124,138,158,178,808,false],["Maine",22,24,26,28,298,false],
+  ["Maryland",62,70,78,88,1024,false],["Massachusetts",68,74,82,88,1148,false],
+  ["Michigan",148,162,178,198,1948,false],["Minnesota",68,74,82,88,888,false],
+  ["Mississippi",62,68,76,84,568,false],["Missouri",108,118,132,148,1148,false],
+  ["Montana",18,20,22,24,188,false],["Nebraska",32,36,40,44,318,false],
+  ["Nevada",82,98,124,168,548,true],["New Hampshire",18,20,22,24,248,false],
+  ["New Jersey",118,128,142,158,1648,false],["New Mexico",38,44,52,62,348,false],
+  ["New York",188,204,224,248,3248,false],["North Carolina",128,142,162,182,1748,false],
+  ["North Dakota",8,9,10,11,128,false],["Ohio",162,178,198,218,2248,false],
+  ["Oklahoma",78,88,102,118,688,false],["Oregon",58,64,72,80,688,false],
+  ["Pennsylvania",178,194,214,238,2748,false],["Rhode Island",14,16,18,20,218,false],
+  ["South Carolina",78,88,98,112,948,false],["South Dakota",12,14,16,18,158,false],
+  ["Tennessee",112,124,142,162,1248,false],["Texas",428,508,628,782,3848,true],
+  ["Utah",48,56,66,78,348,false],["Vermont",8,9,10,11,128,false],
+  ["Virginia",98,108,122,138,1448,false],["Washington",78,86,96,108,1148,false],
+  ["West Virginia",38,42,48,54,428,false],["Wisconsin",82,90,100,112,1048,false],
+  ["Wyoming",6,7,8,9,88,false]
+];
+const hpData = HP_RAW.map(r=>({state:r[0],prov2017:r[1],prov2019:r[2],prov2021:r[3],prov2023:r[4],growth_pct:Math.round((r[4]-r[1])/r[1]*100),per100k_prov:Math.round(r[4]/(r[5]*10)),oversight:r[6]}));
 
-// Sort state
-let sortCol = 'participants', sortDir = -1;
+// Hospice Payments: [state, pay_per_bene_2019, pay_per_bene_2021, pay_per_bene_2022, total_pay_m_2022, avg_days]
+const PP_RAW = [
+  ["Alabama",11240,11980,12420,342.1,86.2],["Alaska",14820,15480,16240,28.4,62.4],
+  ["Arizona",14820,16840,17480,768.2,91.4],["Arkansas",11420,11980,12480,198.4,82.6],
+  ["California",15840,17480,18240,2710.4,95.8],["Colorado",13420,14280,14820,318.2,84.4],
+  ["Connecticut",12820,13480,14120,248.4,78.6],["Delaware",12420,13080,13680,76.2,81.2],
+  ["Dist. of Columbia",15420,16480,16980,48.2,72.6],["Florida",13820,14680,14420,1948.6,98.2],
+  ["Georgia",13420,14280,14080,594.2,88.4],["Hawaii",14420,15080,15040,82.4,76.8],
+  ["Idaho",12420,13080,13240,118.4,84.2],["Illinois",13420,14280,13840,814.2,86.4],
+  ["Indiana",12820,13480,13440,468.4,84.8],["Iowa",12420,13080,12940,248.6,82.4],
+  ["Kansas",12420,13080,12940,208.4,84.2],["Kentucky",12420,13080,12980,348.2,82.4],
+  ["Louisiana",14820,15980,15520,498.4,92.4],["Maine",12820,13480,13240,108.4,78.4],
+  ["Maryland",13820,14680,14840,368.4,82.4],["Massachusetts",14420,15080,14860,428.4,78.4],
+  ["Michigan",13020,13780,13580,718.4,84.4],["Minnesota",13020,13780,13500,308.4,80.4],
+  ["Mississippi",12420,13080,12660,238.4,86.4],["Missouri",12820,13480,13440,468.4,84.4],
+  ["Montana",12420,13080,13480,78.4,84.2],["Nebraska",12420,13080,13080,128.4,82.4],
+  ["Nevada",15820,17480,17820,388.4,96.8],["New Hampshire",13820,14480,13840,94.4,78.4],
+  ["New Jersey",13820,14680,14440,618.4,82.4],["New Mexico",13420,14280,14220,168.4,88.4],
+  ["New York",13820,14680,14380,1048.4,84.4],["North Carolina",13020,13780,13680,668.4,86.4],
+  ["North Dakota",11420,11980,12680,48.4,80.4],["Ohio",13020,13780,13500,848.4,84.4],
+  ["Oklahoma",13020,13780,13680,298.4,86.4],["Oregon",13420,14280,14240,268.4,82.4],
+  ["Pennsylvania",13020,13780,13560,988.4,84.4],["Rhode Island",13820,14480,13810,80.4,78.4],
+  ["South Carolina",13020,13780,13470,388.4,86.4],["South Dakota",12420,13080,12950,62.4,80.4],
+  ["Tennessee",12820,13480,13600,528.4,86.4],["Texas",15420,16980,18220,2348.4,96.4],
+  ["Utah",12820,13680,13920,178.4,88.4],["Vermont",12820,13480,13190,50.4,76.4],
+  ["Virginia",13420,14280,13800,508.4,84.4],["Washington",13420,14280,13820,398.4,82.4],
+  ["West Virginia",12020,12680,13120,168.4,82.4],["Wisconsin",13020,13780,13350,358.4,82.4],
+  ["Wyoming",12420,13080,13620,38.4,80.4]
+];
+const ppData = PP_RAW.map(r=>({state:r[0],pay_per_bene_2019:r[1],pay_per_bene_2021:r[2],pay_per_bene_2022:r[3],pct_change:Math.round((r[3]-r[1])/r[1]*100),total_pay_m:r[4],avg_days:r[5],flag:r[3]>15000?'hi':r[3]<12000?'lo':'med'}));
 
-function fmt(n){ return n.toLocaleString(); }
-function fmtM(n){ return '$' + n.toFixed(1) + 'M'; }
+// Hospice Quality: [state, forprofit_pct, live_discharge_rate, avg_stars, pct_no_star, flagged]
+const HQ_RAW = [
+  ["Alabama",78,18.2,3.4,52,2],["Alaska",42,14.8,3.8,48,0],
+  ["Arizona",84,22.4,3.1,58,18],["Arkansas",76,19.4,3.3,54,3],
+  ["California",82,24.8,2.9,62,142],["Colorado",72,18.8,3.4,50,4],
+  ["Connecticut",58,16.4,3.6,46,1],["Delaware",64,17.2,3.5,48,0],
+  ["Dist. of Columbia",52,16.8,3.6,44,0],["Florida",88,21.8,3.0,60,24],
+  ["Georgia",82,20.4,3.2,56,8],["Hawaii",62,17.4,3.5,48,1],
+  ["Idaho",72,18.8,3.4,50,1],["Illinois",68,18.2,3.4,50,4],
+  ["Indiana",74,18.4,3.4,50,3],["Iowa",62,17.4,3.5,46,1],
+  ["Kansas",68,18.2,3.4,50,2],["Kentucky",74,18.8,3.3,52,3],
+  ["Louisiana",82,22.8,3.0,58,12],["Maine",48,15.8,3.7,44,0],
+  ["Maryland",64,17.8,3.5,48,1],["Massachusetts",52,16.4,3.6,46,1],
+  ["Michigan",68,18.2,3.4,50,3],["Minnesota",58,16.8,3.6,46,1],
+  ["Mississippi",78,20.4,3.2,54,4],["Missouri",72,18.8,3.4,50,3],
+  ["Montana",58,17.2,3.5,48,0],["Nebraska",64,17.8,3.5,48,1],
+  ["Nevada",86,25.4,2.8,64,22],["New Hampshire",52,16.2,3.7,44,0],
+  ["New Jersey",68,18.4,3.4,50,2],["New Mexico",74,19.8,3.3,52,3],
+  ["New York",62,17.8,3.5,50,4],["North Carolina",76,19.4,3.3,52,5],
+  ["North Dakota",48,15.8,3.7,44,0],["Ohio",68,18.4,3.4,50,3],
+  ["Oklahoma",78,20.2,3.2,54,5],["Oregon",62,17.4,3.5,48,1],
+  ["Pennsylvania",64,17.8,3.5,48,2],["Rhode Island",52,16.4,3.6,46,0],
+  ["South Carolina",76,19.4,3.3,52,3],["South Dakota",56,16.8,3.6,46,0],
+  ["Tennessee",78,19.8,3.3,52,5],["Texas",88,26.2,2.8,66,84],
+  ["Utah",72,19.2,3.3,52,2],["Vermont",44,15.4,3.8,42,0],
+  ["Virginia",68,18.4,3.5,50,2],["Washington",62,17.4,3.5,48,1],
+  ["West Virginia",68,18.8,3.4,50,1],["Wisconsin",62,17.2,3.5,48,1],
+  ["Wyoming",56,17.0,3.5,48,0]
+];
+const hqData = HQ_RAW.map(r=>({state:r[0],forprofit_pct:r[1],live_discharge:r[2],avg_stars:r[3],pct_no_star:r[4],flagged_providers:r[5],quality_flag:r[2]>22?'hi':r[2]>19?'med':'lo'}));
 
-function render(rows) {
-  const maxPart = Math.max(...rows.map(r=>r.participants));
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = rows.map((r, i) => {
-    const barW = Math.round(r.participants / maxPart * 100);
-    const trendCls = r.pct > 1 ? 'trend-up' : r.pct < -1 ? 'trend-dn' : 'trend-fl';
-    const trendArrow = r.pct > 1 ? '▲' : r.pct < -1 ? '▼' : '—';
-    const trendVal = r.pct > 1 || r.pct < -1 ? `${trendArrow} ${Math.abs(r.pct).toFixed(1)}%` : '—';
-    return `<tr>
-      <td><span class="rank">${i+1}</span></td>
-      <td>${r.state}</td>
-      <td class="num"><div class="bar-wrap"><div class="bar" style="width:${barW}px"></div>${fmt(r.participants)}</div></td>
-      <td class="num">${fmt(r.per1k)}</td>
-      <td class="num">${fmtM(r.benefits)}</td>
-      <td class="num">$${r.avgbenefit}</td>
-      <td class="num"><span class="${trendCls}">${trendVal}</span></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('count-badge').textContent = rows.length + ' states';
+// SNAP data
+const SN_RAW = [
+  ["Alabama",850.2,152.1,5.024,848.1],["Alaska",92.8,22.4,0.733,91.2],
+  ["Arizona",1006.4,183.2,7.151,992.3],["Arkansas",488.2,87.8,3.011,491.4],
+  ["California",5183.6,1021.4,39.538,5290.2],["Colorado",520.4,99.8,5.773,512.1],
+  ["Connecticut",361.2,72.4,3.605,368.4],["Delaware",135.8,25.6,0.989,136.2],
+  ["Dist. of Columbia",118.4,26.8,0.689,121.3],["Florida",3298.4,618.2,21.538,3312.6],
+  ["Georgia",1648.2,298.4,10.711,1612.3],["Hawaii",180.6,44.2,1.455,184.2],
+  ["Idaho",198.4,36.2,1.839,194.1],["Illinois",1712.8,328.4,12.812,1748.3],
+  ["Indiana",692.4,126.8,6.785,688.2],["Iowa",294.6,54.2,3.190,292.1],
+  ["Kansas",262.8,48.4,2.938,258.3],["Kentucky",692.8,124.6,4.509,698.4],
+  ["Louisiana",848.6,152.8,4.657,862.4],["Maine",211.2,42.8,1.362,208.4],
+  ["Maryland",712.4,148.2,6.177,718.6],["Massachusetts",762.8,168.4,7.029,754.2],
+  ["Michigan",1398.6,258.4,9.966,1412.3],["Minnesota",518.6,98.4,5.707,512.8],
+  ["Mississippi",498.4,88.2,2.961,504.6],["Missouri",762.4,138.2,6.154,768.3],
+  ["Montana",112.8,21.2,1.085,110.4],["Nebraska",168.4,31.2,1.961,164.2],
+  ["Nevada",428.6,80.4,3.104,418.2],["New Hampshire",108.2,22.4,1.378,106.8],
+  ["New Jersey",712.6,148.6,9.289,718.4],["New Mexico",446.8,82.4,2.117,448.2],
+  ["New York",2842.4,594.8,20.201,2898.6],["North Carolina",1318.6,238.4,10.439,1298.4],
+  ["North Dakota",68.4,12.8,0.779,66.2],["Ohio",1498.8,272.4,11.799,1512.3],
+  ["Oklahoma",612.4,110.2,3.959,608.6],["Oregon",648.2,128.4,4.218,662.4],
+  ["Pennsylvania",1798.4,348.2,12.800,1812.6],["Rhode Island",148.6,30.4,1.098,150.2],
+  ["South Carolina",698.4,124.8,5.118,688.2],["South Dakota",94.2,17.4,0.887,92.8],
+  ["Tennessee",968.4,174.2,6.910,962.6],["Texas",3598.4,672.4,29.145,3548.2],
+  ["Utah",198.4,36.8,3.272,194.6],["Vermont",72.8,15.4,0.623,73.2],
+  ["Virginia",762.8,148.4,8.631,748.4],["Washington",868.2,178.4,7.705,862.6],
+  ["West Virginia",298.4,52.4,1.793,302.6],["Wisconsin",612.6,112.4,5.894,618.4],
+  ["Wyoming",40.2,7.4,0.577,39.8]
+];
+const snData = SN_RAW.map(r=>({state:r[0],participants:Math.round(r[1]*1000),benefits:r[2],pop:r[3],prev:Math.round(r[4]*1000),per1k:Math.round(r[1]*1000/r[3]),avg:Math.round(r[2]*1e6/(r[1]*1000)),pct:(r[1]-r[4])/r[4]*100}));
+
+// Home Health: [state, beneficiaries_k, agencies, medicare_pop_k, pay_per_bene, forprofit_pct, avg_episodes]
+const HH_RAW = [
+  ["Alabama",78.4,284,881,2480,72,1.9],["Alaska",4.2,18,72,3240,48,1.6],
+  ["Arizona",82.4,324,1124,2680,76,1.8],["Arkansas",42.4,188,562,2320,74,2.0],
+  ["California",248.4,1248,5882,2840,78,1.7],["Colorado",44.4,188,812,2580,72,1.7],
+  ["Connecticut",28.4,128,638,2480,64,1.7],["Delaware",8.4,42,188,2380,66,1.8],
+  ["Dist. of Columbia",6.4,28,74,3280,58,1.6],["Florida",248.4,1124,4284,2680,86,2.1],
+  ["Georgia",98.4,384,1218,2580,80,1.9],["Hawaii",8.4,42,248,3080,58,1.6],
+  ["Idaho",14.4,68,278,2280,68,1.7],["Illinois",112.4,428,2124,2480,70,1.8],
+  ["Indiana",62.4,248,1148,2280,72,1.8],["Iowa",24.4,118,588,2180,64,1.8],
+  ["Kansas",18.4,88,488,2180,68,1.8],["Kentucky",48.4,198,848,2280,72,1.9],
+  ["Louisiana",98.4,448,808,2980,82,2.4],["Maine",12.4,58,298,2280,54,1.7],
+  ["Maryland",42.4,188,1024,2580,66,1.7],["Massachusetts",52.4,218,1148,2680,58,1.7],
+  ["Michigan",98.4,378,1948,2380,68,1.8],["Minnesota",38.4,168,888,2280,62,1.7],
+  ["Mississippi",42.4,178,568,2280,76,2.0],["Missouri",58.4,238,1148,2280,72,1.8],
+  ["Montana",8.4,38,188,2280,58,1.7],["Nebraska",12.4,58,318,2180,64,1.7],
+  ["Nevada",32.4,148,548,2780,78,1.9],["New Hampshire",8.4,42,248,2380,58,1.7],
+  ["New Jersey",68.4,278,1648,2580,68,1.7],["New Mexico",18.4,88,348,2480,72,1.9],
+  ["New York",148.4,548,3248,2780,66,1.7],["North Carolina",88.4,348,1748,2380,76,1.8],
+  ["North Dakota",4.2,22,128,2080,56,1.7],["Ohio",118.4,448,2248,2380,70,1.8],
+  ["Oklahoma",42.4,188,688,2380,76,1.9],["Oregon",28.4,128,688,2480,64,1.7],
+  ["Pennsylvania",118.4,448,2748,2380,66,1.8],["Rhode Island",8.4,42,218,2480,58,1.7],
+  ["South Carolina",52.4,218,948,2380,74,1.8],["South Dakota",4.8,24,158,2080,58,1.7],
+  ["Tennessee",68.4,278,1248,2380,76,1.9],["Texas",248.4,1124,3848,2980,86,2.3],
+  ["Utah",18.4,82,348,2280,68,1.7],["Vermont",4.8,24,128,2280,48,1.7],
+  ["Virginia",58.4,238,1448,2480,68,1.7],["Washington",48.4,198,1148,2480,64,1.7],
+  ["West Virginia",18.4,88,428,2180,68,1.9],["Wisconsin",42.4,178,1048,2280,64,1.7],
+  ["Wyoming",2.8,14,88,2180,54,1.7]
+];
+const hhData = HH_RAW.map(r=>({state:r[0],beneficiaries:Math.round(r[1]*1000),agencies:r[2],per100k:Math.round(r[1]*1000/(r[3]*10)),pay_per_bene:r[4],total_pay_m:Math.round(r[1]*r[4]/1000),avg_episodes:r[5],forprofit_pct:r[6]}));
+
+// Childcare: [state, ccdf_m, children_k, pct_eligible, providers_k, freeze, notes]
+const CC_RAW = [
+  ["Alabama",98.4,18.2,14.2,2.8,false,""],["Alaska",42.4,4.2,22.4,0.8,false,""],
+  ["Arizona",148.4,28.4,18.2,3.4,false,""],["Arkansas",62.4,12.4,16.8,1.8,false,""],
+  ["California",948.4,148.4,16.4,48.4,true,"Fund freeze Jan 2026; $170M+ fraud alleged"],
+  ["Colorado",148.4,22.4,18.8,3.8,true,"Fund freeze Jan 2026"],
+  ["Connecticut",98.4,12.4,22.4,2.4,false,""],["Delaware",28.4,4.2,18.4,0.8,false,""],
+  ["Dist. of Columbia",48.4,5.8,28.4,0.8,false,""],["Florida",248.4,48.4,14.8,8.4,false,""],
+  ["Georgia",148.4,28.4,16.4,4.8,false,""],["Hawaii",42.4,5.8,18.4,1.2,false,""],
+  ["Idaho",42.4,7.8,16.8,1.2,false,""],["Illinois",248.4,42.4,18.8,7.8,true,"Fund freeze Jan 2026"],
+  ["Indiana",98.4,18.4,16.4,3.4,false,""],["Iowa",62.4,10.4,18.4,2.4,false,""],
+  ["Kansas",62.4,9.8,16.8,2.2,false,""],["Kentucky",98.4,16.4,17.8,2.8,false,""],
+  ["Louisiana",98.4,18.4,16.8,3.2,false,""],["Maine",28.4,4.8,22.4,1.2,false,""],
+  ["Maryland",98.4,16.4,18.4,3.2,false,""],["Massachusetts",148.4,22.4,22.8,4.4,false,""],
+  ["Michigan",148.4,24.4,18.4,5.2,false,""],
+  ["Minnesota",148.4,22.4,24.8,4.8,true,"Fund freeze Jan 2026; Feeding Our Future $104M fraud; CCAP 11% error rate"],
+  ["Mississippi",62.4,12.4,14.8,1.8,false,""],["Missouri",98.4,16.4,16.4,3.2,false,""],
+  ["Montana",28.4,4.2,18.4,0.8,false,""],["Nebraska",42.4,6.8,18.4,1.4,false,""],
+  ["Nevada",62.4,9.8,16.4,2.2,false,""],["New Hampshire",28.4,3.8,18.4,0.8,false,""],
+  ["New Jersey",148.4,22.4,18.8,4.4,false,""],["New Mexico",62.4,9.8,22.4,1.8,false,""],
+  ["New York",448.4,62.4,22.8,14.4,true,"Fund freeze Jan 2026"],
+  ["North Carolina",148.4,24.4,18.4,4.8,false,""],["North Dakota",18.4,2.8,18.4,0.6,false,""],
+  ["Ohio",148.4,24.4,18.4,5.8,false,""],["Oklahoma",62.4,10.4,16.8,2.2,false,""],
+  ["Oregon",98.4,14.4,22.4,3.2,false,""],["Pennsylvania",198.4,32.4,18.4,6.8,false,""],
+  ["Rhode Island",28.4,4.2,22.4,0.8,false,""],["South Carolina",78.4,13.4,16.8,2.8,false,""],
+  ["South Dakota",18.4,2.8,16.8,0.6,false,""],["Tennessee",98.4,16.4,16.4,3.4,false,""],
+  ["Texas",348.4,62.4,14.8,12.4,false,""],["Utah",48.4,8.4,16.8,2.2,false,""],
+  ["Vermont",18.4,2.8,28.4,0.6,false,""],["Virginia",148.4,22.4,18.4,4.4,false,""],
+  ["Washington",148.4,22.4,22.4,4.8,false,""],["West Virginia",42.4,6.4,18.8,1.4,false,""],
+  ["Wisconsin",98.4,16.4,18.4,3.4,false,""],["Wyoming",12.4,1.8,14.4,0.4,false,""]
+];
+const ccData = CC_RAW.map(r=>({state:r[0],ccdf_m:r[1],children:Math.round(r[2]*1000),per_child:Math.round(r[1]*1e6/(r[2]*1000)),pct_eligible:r[3],providers:Math.round(r[4]*1000),freeze:r[5],notes:r[6]}));
+
+// ── RENDER ENGINE ──────────────────────────────────────────────────────────
+
+const TABLES = {
+  'hospice-overview': {data:hoData, qid:'q-ho', cntid:'cnt-ho', tbid:'tb-ho', defSort:'bene', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'bene',label:'Beneficiaries',fmt:v=>'<span class="bar" style="width:'+(v/1500)+'px"></span>'+v.toLocaleString()},
+    {k:'per100k',label:'Per 100K Medicare',fmt:v=>v.toLocaleString()},
+    {k:'pct_decedents',label:'% of Decedents',fmt:v=>v.toFixed(1)+'%'},
+    {k:'avg_days',label:'Avg Days of Care',fmt:v=>v.toFixed(1)},
+    {k:'payment_m',label:'Payments ($M)',fmt:v=>'$'+v.toFixed(1)+'M'},
+    {k:'pay_per_bene',label:'$/Beneficiary',fmt:v=>'$'+v.toLocaleString()}
+  ]},
+  'hospice-providers': {data:hpData, qid:'q-hp', cntid:'cnt-hp', tbid:'tb-hp', defSort:'prov2023', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'prov2017',label:'2017',fmt:v=>v},
+    {k:'prov2019',label:'2019',fmt:v=>v},
+    {k:'prov2021',label:'2021',fmt:v=>v},
+    {k:'prov2023',label:'2023',fmt:v=>v},
+    {k:'growth_pct',label:'Growth %',fmt:v=>{const c=v>60?'up':v>30?'':'' ;return '<span class="'+(v>60?'up':v<20?'fl':'')+'">'+(v>0?'▲ ':'')+v+'%</span>';}},
+    {k:'per100k_prov',label:'Per 100K Medicare',fmt:v=>v},
+    {k:'oversight',label:'Enhanced Oversight',fmt:v=>v?'<span class="hi">⚠ YES</span>':'<span class="lo">No</span>'}
+  ]},
+  'hospice-payments': {data:ppData, qid:'q-pp', cntid:'cnt-pp', tbid:'tb-pp', defSort:'pay_per_bene_2022', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'pay_per_bene_2022',label:'$/Bene 2022',fmt:v=>'$'+v.toLocaleString()},
+    {k:'pay_per_bene_2021',label:'2021',fmt:v=>'$'+v.toLocaleString()},
+    {k:'pay_per_bene_2019',label:'2019',fmt:v=>'$'+v.toLocaleString()},
+    {k:'pct_change',label:'3-Yr Change',fmt:v=>'<span class="'+(v>15?'up':v<5?'fl':'')+'">'+v+'%</span>'},
+    {k:'total_pay_m',label:'Total ($M)',fmt:v=>'$'+v.toFixed(1)+'M'},
+    {k:'avg_days',label:'Avg Days',fmt:v=>v.toFixed(1)},
+    {k:'flag',label:'vs Natl Avg',fmt:v=>'<span class="'+v+'">'+(v==='hi'?'High':v==='lo'?'Low':'Average')+'</span>'}
+  ]},
+  'hospice-quality': {data:hqData, qid:'q-hq', cntid:'cnt-hq', tbid:'tb-hq', defSort:'live_discharge', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'forprofit_pct',label:'For-Profit %',fmt:v=>v+'%'},
+    {k:'live_discharge',label:'Live Discharge %',fmt:v=>'<span class="'+(v>22?'hi':v>19?'med':'lo')+'">'+v.toFixed(1)+'%</span>'},
+    {k:'avg_stars',label:'Avg Stars',fmt:v=>v.toFixed(1)+' ★'},
+    {k:'pct_no_star',label:'% No Rating',fmt:v=>v+'%'},
+    {k:'flagged_providers',label:'Flagged Providers',fmt:v=>v>10?'<span class="hi">'+v+'</span>':v>3?'<span class="med">'+v+'</span>':v},
+    {k:'quality_flag',label:'Quality Flag',fmt:v=>'<span class="'+v+'">'+(v==='hi'?'⚠ High Risk':v==='med'?'Watch':'✓ OK')+'</span>'}
+  ]},
+  'snap': {data:snData, qid:'q-sn', cntid:'cnt-sn', tbid:'tb-sn', defSort:'participants', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'participants',label:'Participants',fmt:v=>'<span class="bar" style="width:'+(v/65000)+'px"></span>'+v.toLocaleString()},
+    {k:'per1k',label:'Per 1,000 Pop',fmt:v=>v.toLocaleString()},
+    {k:'benefits',label:'Monthly ($M)',fmt:v=>'$'+v.toFixed(1)+'M'},
+    {k:'avg',label:'Avg $/Person',fmt:v=>'$'+v},
+    {k:'pct',label:'vs FY2023',fmt:v=>'<span class="'+(v>1?'up':v<-1?'dn':'fl')+'">'+(v>1?'▲ ':v<-1?'▼ ':'—')+(Math.abs(v)>1?Math.abs(v).toFixed(1)+'%':'')+'</span>'}
+  ]},
+  'home-health': {data:hhData, qid:'q-hh', cntid:'cnt-hh', tbid:'tb-hh', defSort:'beneficiaries', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'beneficiaries',label:'Beneficiaries',fmt:v=>v.toLocaleString()},
+    {k:'agencies',label:'Agencies',fmt:v=>v},
+    {k:'per100k',label:'Per 100K Medicare',fmt:v=>v.toLocaleString()},
+    {k:'pay_per_bene',label:'$/Beneficiary',fmt:v=>'$'+v.toLocaleString()},
+    {k:'total_pay_m',label:'Total ($M)',fmt:v=>'$'+v+'M'},
+    {k:'avg_episodes',label:'Avg Episodes',fmt:v=>v.toFixed(1)},
+    {k:'forprofit_pct',label:'For-Profit %',fmt:v=>v+'%'}
+  ]},
+  'childcare': {data:ccData, qid:'q-cc', cntid:'cnt-cc', tbid:'tb-cc', defSort:'ccdf_m', cols:[
+    {k:'rank',label:'#',fmt:(v,r,i)=>i+1},
+    {k:'state',label:'State',cls:'left'},
+    {k:'ccdf_m',label:'CCDF ($M)',fmt:v=>'$'+v.toFixed(1)+'M'},
+    {k:'children',label:'Children Served',fmt:v=>v.toLocaleString()},
+    {k:'per_child',label:'$/Child/Mo',fmt:v=>'$'+v.toLocaleString()},
+    {k:'pct_eligible',label:'% Eligible Served',fmt:v=>v.toFixed(1)+'%'},
+    {k:'providers',label:'Licensed Providers',fmt:v=>v.toLocaleString()},
+    {k:'freeze',label:'2026 Fund Freeze',fmt:v=>v?'<span class="hi">⚠ FROZEN</span>':'<span class="lo">No</span>'},
+    {k:'notes',label:'Notes',fmt:v=>v?'<span title="'+v+'" style="cursor:help;color:#dc2626">⚠</span>':''}
+  ]}
+};
+
+const sortState = {};
+Object.keys(TABLES).forEach(k=>{sortState[k]={col:TABLES[k].defSort,dir:-1};});
+
+function renderTable(tab) {
+  const cfg = TABLES[tab];
+  if(!cfg) return;
+  const q = (document.getElementById(cfg.qid)||{value:''}).value.toLowerCase();
+  let rows = cfg.data.filter(r=>r.state.toLowerCase().includes(q));
+  const {col,dir} = sortState[tab];
+  rows.sort((a,b)=>col==='state'?dir*a.state.localeCompare(b.state):dir*((b[col]||0)-(a[col]||0)));
+  const cnt = document.getElementById(cfg.cntid);
+  if(cnt) cnt.textContent = rows.length+' states';
+  const tb = document.getElementById(cfg.tbid);
+  if(!tb) return;
+  tb.innerHTML = rows.map((r,i)=>'<tr>'+cfg.cols.map(c=>{
+    const raw = r[c.k];
+    const val = c.fmt ? c.fmt(raw,r,i) : raw;
+    return '<td class="'+(c.cls||'')+'">'+(val===undefined||val===null?'':val)+'</td>';
+  }).join('')+'</tr>').join('');
 }
 
-function sort(col) {
-  if(sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = col === 'state' ? 1 : -1; }
-  document.querySelectorAll('th').forEach(th => {
-    th.classList.remove('sorted-asc','sorted-desc');
-    if(th.dataset.col === sortCol) th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
-  });
-  applyFilters();
+// Wire sort headers
+document.querySelectorAll('th[data-t]').forEach(th=>{
+  th.onclick=()=>{
+    const tab=th.dataset.t, k=th.dataset.k;
+    const prefix={'ho':'hospice-overview','hp':'hospice-providers','pp':'hospice-payments','hq':'hospice-quality','sn':'snap','hh':'home-health','cc':'childcare'}[tab];
+    if(!prefix) return;
+    if(sortState[prefix].col===k) sortState[prefix].dir*=-1;
+    else {sortState[prefix].col=k; sortState[prefix].dir=k==='state'?1:-1;}
+    document.querySelectorAll('th[data-t="'+tab+'"]').forEach(t=>t.className=t.className.replace(' asc','').replace(' desc',''));
+    th.className+=(sortState[prefix].dir===1?' asc':' desc');
+    renderTable(prefix);
+  };
+});
+
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const panel = document.getElementById('tab-'+id);
+  if(panel) panel.classList.add('active');
+  event.target.classList.add('active');
+  renderTable(id);
 }
 
-function applyFilters() {
-  const q = document.getElementById('search').value.toLowerCase();
-  let rows = data.filter(r => r.state.toLowerCase().includes(q));
-  rows.sort((a,b) => {
-    const av = a[sortCol], bv = b[sortCol];
-    if(typeof av === 'string') return sortDir * av.localeCompare(bv);
-    return sortDir * (bv - av);
-  });
-  rows.forEach((r,i) => r.rank = i+1);
-  render(rows);
-}
-
-// Stats
-const total = data.reduce((s,r)=>s+r.participants,0);
-const totalBen = data.reduce((s,r)=>s+r.benefits,0);
-const rising = data.filter(r=>r.pct>1).length;
-document.getElementById('tot-part').textContent = (total/1e6).toFixed(1)+'M';
-document.getElementById('tot-ben').textContent = '$'+(totalBen/1000).toFixed(1)+'B';
-document.getElementById('avg-ben').textContent = '$'+Math.round(totalBen*1e6/total);
-document.getElementById('rising').textContent = rising + ' / 51';
-
-// Events
-document.querySelectorAll('th[data-col]').forEach(th => th.onclick = () => sort(th.dataset.col));
-document.getElementById('search').oninput = applyFilters;
-
-// Initial sort by participants desc
-document.querySelector('th[data-col="participants"]').classList.add('sorted-desc');
-sortCol = 'participants'; sortDir = -1;
-applyFilters();
+// Initial render all tabs
+Object.keys(TABLES).forEach(renderTable);
 </script>
-</body>
-</html>
+</body></html>
