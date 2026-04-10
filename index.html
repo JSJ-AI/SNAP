@@ -45,6 +45,31 @@ tr:hover td{background:#fafbff}
 .med{background:#fffbeb;color:#92400e;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
 .lo{background:#f0fdf4;color:#166534;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
 .footer{margin-top:10px;font-size:11px;color:#aaa}
+
+/* CHART STYLES */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px 24px}
+.chart-card{background:#1a2332;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.chart-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.chart-header{padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.chart-title{font-size:14px;font-weight:700;color:#f0f6ff;margin-bottom:3px}
+.chart-subtitle{font-size:11px;color:#8caabf}
+.chart-insight{font-size:11px;margin-top:6px;padding:5px 10px;border-radius:4px;background:rgba(255,255,255,.06);color:#c4d8ee}
+.chart-body{padding:14px 20px 16px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bar-state{font-size:11px;color:#c4d8ee;width:88px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:18px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.bar-val{font-size:11px;font-weight:600;color:#f0f6ff;position:absolute;right:6px;top:50%;transform:translateY(-50%);white-space:nowrap}
+.chart-link{display:block;text-align:center;padding:8px;font-size:11px;color:#3d8eff;border-top:1px solid rgba(255,255,255,.06);background:rgba(61,142,255,.05);text-decoration:none;font-weight:500}
+.chart-link:hover{background:rgba(61,142,255,.12)}
+.flag-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:4px;vertical-align:middle}
+.overview-header{padding:20px 24px 0;background:#f0f2f5}
+.overview-header h2{font-size:16px;font-weight:700;color:#111;margin-bottom:4px}
+.overview-header p{font-size:12px;color:#888;margin-bottom:16px}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:0}
+.filter-btn{padding:5px 14px;border:1px solid #ddd;border-radius:20px;font-size:12px;background:#fff;cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:#1a2332;color:#fff;border-color:#1a2332}
+@media(max-width:900px){.overview-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -53,7 +78,8 @@ tr:hover td{background:#fafbff}
   <span class="sub">Medicare Hospice · SNAP · Home Health · Childcare Assistance</span>
 </div>
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('hospice-overview')">Hospice Overview</button>
+  <button class="tab-btn active" onclick="showTab('overview')">📊 Overview</button>
+  <button class="tab-btn" onclick="showTab('hospice-overview')">Hospice Overview</button>
   <button class="tab-btn" onclick="showTab('hospice-providers')">Providers &amp; Growth</button>
   <button class="tab-btn" onclick="showTab('hospice-payments')">Payments &amp; Billing</button>
   <button class="tab-btn" onclick="showTab('hospice-quality')">Quality &amp; For-Profit</button>
@@ -62,7 +88,22 @@ tr:hover td{background:#fafbff}
   <button class="tab-btn" onclick="showTab('childcare')">Childcare Assistance</button>
 </div>
 
-<div id="tab-hospice-overview" class="panel active">
+<div id="tab-overview" class="panel active">
+<div class="overview-header">
+  <h2>Government Program Risk Dashboard</h2>
+  <p>Top 15 states by key risk indicators · Click any chart to explore full data · Flagged states shown in red</p>
+  <div class="filter-row" id="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All Programs</button>
+    <button class="filter-btn" onclick="setFilter('hospice',this)">Hospice</button>
+    <button class="filter-btn" onclick="setFilter('snap',this)">SNAP</button>
+    <button class="filter-btn" onclick="setFilter('health',this)">Home Health</button>
+    <button class="filter-btn" onclick="setFilter('childcare',this)">Childcare</button>
+  </div>
+</div>
+<div class="overview-grid" id="overview-grid"></div>
+</div>
+
+<div id="tab-hospice-overview" class="panel">
   <div class="panel-header">
     <h2>Medicare Hospice Utilization by State</h2>
     <p>Source: CMS Medicare Hospice Utilization by State Reports · CY2022 data (most recent complete year) · Medicare beneficiaries 65+</p>
@@ -608,5 +649,211 @@ function showTab(id) {
 
 // Initial render all tabs
 Object.keys(TABLES).forEach(renderTable);
+
+/* ── OVERVIEW CHARTS ── */
+const CHARTS = [
+  {
+    id:'c-pay-bene', group:'hospice', tab:'hospice-payments',
+    title:'Hospice $/Beneficiary by State',
+    subtitle:'CY2022 · National avg $13,780 · High = potential overbilling',
+    insight:'TX and CA pay $4,000+ above national average per patient',
+    color:'#ef4444', natl:13780,
+    data:[
+      {s:'Texas',v:18220,flag:true},{s:'California',v:18240,flag:true},
+      {s:'Nevada',v:17820,flag:true},{s:'Arizona',v:17480,flag:true},
+      {s:'Louisiana',v:15520,flag:false},{s:'Alaska',v:16240,flag:false},
+      {s:'Dist. of Columbia',v:16980,flag:false},{s:'Florida',v:14420,flag:false},
+      {s:'New Mexico',v:14220,flag:false},{s:'Maryland',v:14840,flag:false},
+      {s:'Hawaii',v:15040,flag:false},{s:'Utah',v:13920,flag:false},
+      {s:'Colorado',v:14820,flag:false},{s:'Massachusetts',v:14860,flag:false},
+      {s:'Virginia',v:13800,flag:false}
+    ]
+  },
+  {
+    id:'c-prov-growth', group:'hospice', tab:'hospice-providers',
+    title:'Hospice Provider Growth 2017→2023',
+    subtitle:'% increase in Medicare-certified agencies · Enhanced oversight states flagged',
+    insight:'NV +105%, AZ +89%, TX +83% — far outpacing patient growth',
+    color:'#f97316', natl:38,
+    data:[
+      {s:'Nevada',v:105,flag:true},{s:'Arizona',v:89,flag:true},
+      {s:'Texas',v:83,flag:true},{s:'California',v:85,flag:true},
+      {s:'New Mexico',v:63,flag:false},{s:'Oklahoma',v:51,flag:false},
+      {s:'Utah',v:63,flag:false},{s:'Georgia',v:58,flag:false},
+      {s:'Florida',v:53,flag:false},{s:'Colorado',v:59,flag:false},
+      {s:'South Carolina',v:44,flag:false},{s:'Tennessee',v:45,flag:false},
+      {s:'Louisiana',v:44,flag:false},{s:'Idaho',v:57,flag:false},
+      {s:'North Carolina',v:42,flag:false}
+    ]
+  },
+  {
+    id:'c-live-discharge', group:'hospice', tab:'hospice-quality',
+    title:'Hospice Live Discharge Rate by State',
+    subtitle:'% of patients discharged alive · >20% = CMS concern threshold',
+    insight:'TX 26.2%, NV 25.4% — patients admitted who may not be eligible',
+    color:'#a855f7', natl:18.5,
+    data:[
+      {s:'Texas',v:26.2,flag:true},{s:'Nevada',v:25.4,flag:true},
+      {s:'California',v:24.8,flag:true},{s:'Arizona',v:22.4,flag:true},
+      {s:'Florida',v:21.8,flag:true},{s:'Louisiana',v:22.8,flag:true},
+      {s:'Mississippi',v:20.4,flag:true},{s:'Oklahoma',v:20.2,flag:false},
+      {s:'Georgia',v:20.4,flag:false},{s:'Tennessee',v:19.8,flag:false},
+      {s:'New Mexico',v:19.8,flag:false},{s:'South Carolina',v:19.4,flag:false},
+      {s:'Arkansas',v:19.4,flag:false},{s:'North Carolina',v:19.4,flag:false},
+      {s:'Alabama',v:18.2,flag:false}
+    ]
+  },
+  {
+    id:'c-forprofit', group:'hospice', tab:'hospice-quality',
+    title:'Hospice For-Profit Share by State',
+    subtitle:'% of hospice agencies that are for-profit · National avg 73%',
+    insight:'TX and FL at 88% — highest concentration of for-profit hospices',
+    color:'#ec4899', natl:73,
+    data:[
+      {s:'Texas',v:88,flag:true},{s:'Florida',v:88,flag:true},
+      {s:'Nevada',v:86,flag:true},{s:'California',v:82,flag:true},
+      {s:'Arizona',v:84,flag:true},{s:'Georgia',v:82,flag:false},
+      {s:'Louisiana',v:82,flag:false},{s:'Mississippi',v:78,flag:false},
+      {s:'Alabama',v:78,flag:false},{s:'Oklahoma',v:78,flag:false},
+      {s:'Tennessee',v:78,flag:false},{s:'South Carolina',v:76,flag:false},
+      {s:'North Carolina',v:76,flag:false},{s:'Arkansas',v:76,flag:false},
+      {s:'Indiana',v:74,flag:false}
+    ]
+  },
+  {
+    id:'c-snap', group:'snap', tab:'snap',
+    title:'SNAP Participants per 1,000 Population',
+    subtitle:'FY2024 · Higher = greater food insecurity / program dependence',
+    insight:'NM 211/1K, LA 182/1K — more than 1 in 5 residents on SNAP',
+    color:'#14b8a6', natl:128,
+    data:[
+      {s:'New Mexico',v:211,flag:false},{s:'Louisiana',v:182,flag:false},
+      {s:'Mississippi',v:168,flag:false},{s:'West Virginia',v:166,flag:false},
+      {s:'Alabama',v:169,flag:false},{s:'Dist. of Columbia',v:172,flag:false},
+      {s:'Arkansas',v:162,flag:false},{s:'Kentucky',v:154,flag:false},
+      {s:'Maine',v:155,flag:false},{s:'Tennessee',v:140,flag:false},
+      {s:'Georgia',v:154,flag:false},{s:'Oklahoma',v:155,flag:false},
+      {s:'South Carolina',v:136,flag:false},{s:'Michigan',v:140,flag:false},
+      {s:'Florida',v:153,flag:false}
+    ]
+  },
+  {
+    id:'c-snap-trend', group:'snap', tab:'snap',
+    title:'SNAP Participation Change vs Prior Year',
+    subtitle:'FY2024 vs FY2023 · States with rising caseloads',
+    insight:'NC +1.5%, GA +2.2%, TX +1.4% growing despite economic recovery',
+    color:'#0ea5e9', natl:0,
+    data:[
+      {s:'Georgia',v:2.2,flag:false},{s:'Nebraska',v:2.6,flag:false},
+      {s:'North Dakota',v:3.3,flag:false},{s:'Montana',v:2.2,flag:false},
+      {s:'Idaho',v:2.2,flag:false},{s:'Utah',v:2.0,flag:false},
+      {s:'Texas',v:1.4,flag:false},{s:'Oklahoma',v:0.6,flag:false},
+      {s:'Colorado',v:1.6,flag:false},{s:'North Carolina',v:1.5,flag:false},
+      {s:'South Carolina',v:1.5,flag:false},{s:'New Hampshire',v:1.3,flag:false},
+      {s:'Alaska',v:1.8,flag:false},{s:'Maine',v:1.3,flag:false},
+      {s:'Virginia',v:1.9,flag:false}
+    ]
+  },
+  {
+    id:'c-homehealth', group:'health', tab:'home-health',
+    title:'Home Health Agencies per 100K Medicare',
+    subtitle:'CY2022 · High density = potential market saturation / fraud risk',
+    insight:'LA has 55 agencies per 100K Medicare — nearly 3x national avg',
+    color:'#3b82f6', natl:20,
+    data:[
+      {s:'Louisiana',v:55,flag:true},{s:'Texas',v:29,flag:true},
+      {s:'Florida',v:26,flag:false},{s:'Mississippi',v:31,flag:false},
+      {s:'Alabama',v:32,flag:false},{s:'Arkansas',v:33,flag:false},
+      {s:'Nevada',v:27,flag:false},{s:'Oklahoma',v:27,flag:false},
+      {s:'Georgia',v:32,flag:false},{s:'New Mexico',v:25,flag:false},
+      {s:'Tennessee',v:22,flag:false},{s:'South Carolina',v:23,flag:false},
+      {s:'Arizona',v:29,flag:false},{s:'Missouri',v:21,flag:false},
+      {s:'Kentucky',v:23,flag:false}
+    ]
+  },
+  {
+    id:'c-childcare', group:'childcare', tab:'childcare',
+    title:'Childcare CCDF Spending per Child per Month',
+    subtitle:'FY2022 · HHS froze funds Jan 2026 for 5 states · Frozen states flagged',
+    insight:'CO $660/child, NY $718/child — highest subsidy rates; both frozen',
+    color:'#22c55e', natl:420,
+    data:[
+      {s:'New York',v:718,flag:true},{s:'Colorado',v:660,flag:true},
+      {s:'Massachusetts',v:664,flag:false},{s:'California',v:639,flag:true},
+      {s:'Illinois',v:586,flag:true},{s:'Minnesota',v:661,flag:true},
+      {s:'Connecticut',v:794,flag:false},{s:'Washington',v:664,flag:false},
+      {s:'Oregon',v:682,flag:false},{s:'Vermont',v:643,flag:false},
+      {s:'Maryland',v:599,flag:false},{s:'New Jersey',v:664,flag:false},
+      {s:'Alaska',v:500,flag:false},{s:'Hawaii',v:724,flag:false},
+      {s:'Maine',v:591,flag:false}
+    ]
+  }
+];
+
+let activeFilter = 'all';
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildOverview();
+}
+
+function buildOverview() {
+  const grid = document.getElementById('overview-grid');
+  if(!grid) return;
+  const charts = activeFilter==='all' ? CHARTS : CHARTS.filter(c=>c.group===activeFilter);
+  grid.innerHTML = charts.map(c => {
+    const max = Math.max(...c.data.map(d=>d.v));
+    const bars = c.data.slice(0,15).map(d => {
+      const w = Math.round(d.v/max*100);
+      const isFlagged = d.flag;
+      const color = isFlagged ? '#ef4444' : c.color;
+      const val = typeof d.v === 'number' && d.v < 100 && c.id !== 'c-prov-growth' ? 
+        (d.v > 1000 ? '$'+d.v.toLocaleString() : d.v.toFixed(1)+(c.id.includes('pct')||c.id.includes('discharge')||c.id.includes('profit')||c.id==='c-live-discharge'||c.id==='c-forprofit'?'%':c.id==='c-snap-trend'?'%':' ')) :
+        (d.v >= 1000 ? '$'+d.v.toLocaleString() : d.v+(c.id==='c-prov-growth'?'%':c.id==='c-snap'?'':c.id==='c-homehealth'?'':''));
+      const displayVal = c.id==='c-pay-bene'?'$'+d.v.toLocaleString():
+        c.id==='c-prov-growth'?d.v+'%':
+        c.id==='c-live-discharge'?d.v.toFixed(1)+'%':
+        c.id==='c-forprofit'?d.v+'%':
+        c.id==='c-snap'?d.v+'/1K':
+        c.id==='c-snap-trend'?'+'+d.v.toFixed(1)+'%':
+        c.id==='c-homehealth'?d.v+'/100K':
+        c.id==='c-childcare'?'$'+d.v+'/mo':''+d.v;
+      return `<div class="bar-row">
+        <div class="bar-state">${isFlagged?'<span class="flag-dot"></span>':''}${d.s}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${w}%;background:${color};opacity:0.85"></div>
+          <div class="bar-val">${displayVal}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="chart-card" onclick="showTab('${c.tab}');document.querySelector('.tab-btn[onclick*=\\"${c.tab}\\"]')?.click()">
+      <div class="chart-header">
+        <div class="chart-title">${c.title}</div>
+        <div class="chart-subtitle">${c.subtitle}</div>
+        <div class="chart-insight">💡 ${c.insight}</div>
+      </div>
+      <div class="chart-body">${bars}</div>
+      <a class="chart-link" onclick="event.stopPropagation();" href="#" onclick="showTab('${c.tab}')">View full data table →</a>
+    </div>`;
+  }).join('');
+}
+
+// Patch showTab to also build overview when switching to it
+const _origShowTab = window.showTab;
+window.showTab = function(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const panel = document.getElementById('tab-'+id);
+  if(panel) panel.classList.add('active');
+  if(event && event.target) event.target.classList.add('active');
+  renderTable(id);
+  if(id==='overview') buildOverview();
+};
+
+// Build on load
+buildOverview();
+
 </script>
 </body></html>
